@@ -7249,11 +7249,18 @@ installOnline() {
   if [ -z "$_branch" ]; then
     _branch="master"
   fi
+  
+  # Validate branch name to prevent injection attacks
+  # Only allow letters, numbers, underscores, hyphens, and dots
+  if ! echo "$_branch" | grep -qE '^[a-zA-Z0-9_.-]+$'; then
+    _err "Invalid branch name: $_branch"
+    return 1
+  fi
 
   target="$PROJECT/archive/$_branch.tar.gz"
   _info "Downloading $target"
   localname="$_branch.tar.gz"
-  if ! _get "$target" >$localname; then
+  if ! _get "$target" > "$localname"; then
     _err "Download error."
     return 1
   fi
@@ -7289,6 +7296,14 @@ _getUpgradeHash() {
   if [ -z "$_b" ]; then
     _b="master"
   fi
+  
+  # Validate branch name to prevent injection attacks
+  # Only allow letters, numbers, underscores, hyphens, and dots
+  if ! echo "$_b" | grep -qE '^[a-zA-Z0-9_.-]+$'; then
+    _err "Invalid branch name: $_b"
+    return 1
+  fi
+  
   _hash=$(_getRepoHash "heads/$_b")
   if [ -z "$_hash" ]; then _hash=$(_getRepoHash "tags/$_b"); fi
   echo $_hash
